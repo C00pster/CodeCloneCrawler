@@ -1,4 +1,8 @@
 .vscode/
 CodeCloneDatasets/
 testOutput/
-competitions/
+
+!competitions/
+
+competitions/*
+!competitions/path*
