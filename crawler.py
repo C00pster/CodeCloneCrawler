@@ -28,7 +28,7 @@ def get_constraints(soup, url):
         header = soup.find('h3', string='Constraints')
         constraints_html = str(header) + ''.join(str(sibling) for sibling in header.find_next_siblings())
         file_path = get_file_path(url) + "constraints.html"
-        constraints_dict = {file_path: constraints_dict}
+        constraints_dict = {file_path: constraints_html}
     finally:
         return constraints_dict
 
@@ -76,14 +76,16 @@ def get_sample_inputs_and_outputs(soup, url):
             if h3_tag.get_text().startswith(('Sample Input ', 'Sample Output ')):
                 file_path = get_file_path(url) + h3_tag.get_text().lower().replace(' ', '_') + ".txt"
                 input_or_output_text = h3_tag.find_next_sibling().get_text()
+                if inputs_outputs_dict is None: inputs_outputs_dict=dict()
                 inputs_outputs_dict[file_path] = input_or_output_text
     finally:
         return inputs_outputs_dict
     
-def write_dict_to_file(dict):
-    for path, text in dict.items():
-        with open(path, 'w') as file:
-            file.write(text)
+def write_dict_to_file(file_text_dict):
+    for path, text in file_text_dict.items():
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, 'w', encoding="utf-8") as file:
+            file.write(str(text))
 
 # Crawl the input URL
 def crawl(url):
