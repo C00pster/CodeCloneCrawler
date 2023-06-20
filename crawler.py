@@ -14,7 +14,7 @@ def write_to_file(file_path, text):
 
 def get_file_path(url):
     file_path_subfix = url[28:].replace("/tasks", "")
-    return "./testOutput/competitions/" + file_path_subfix + "/"
+    return "./competitions/" + file_path_subfix + "/"
 
 def get_problem_statement(soup, url):
     problem_statement_dict = None
