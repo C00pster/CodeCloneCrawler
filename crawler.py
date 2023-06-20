@@ -2,6 +2,10 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
 import os
+import concurrent.futures
+import time
+import threading
+from queue import Queue
 
 def write_to_file(file_path, text):
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
@@ -163,9 +167,52 @@ for line in lines:
         last_slash_index = line.rfind('/')
         urls.add(url_prefix + line[last_slash_index:].rstrip('\n'))
 
-#Crawling page urls
+# #Crawling page urls
+# counter = 0
+# for url in urls:
+#     print(f"URLs Visited: {counter}", end='\r')
+#     crawl(url.strip())
+#     counter += 1
+
+class RateLimiter:
+    def __init__(self, rate):
+        self.delay = 1 / rate
+        self.last_request = 0
+        self.lock = threading.Lock()
+
+    def wait_for_request_slot(self):
+        with self.lock:
+            now = time.time()
+            elapsed = now - self.last_request
+            wait_time = max(0, self.delay - elapsed)
+
+            if wait_time > 0:
+                time.sleep(wait_time)
+            
+            self.last_request = time.time()
+
+# Anything above this number results in an IP ban
+rate_limiter = RateLimiter(2)
+
+# Number of URLs crawled
 counter = 0
-for url in urls:
-    print(f"URLs Visited: {counter}", end='\r')
+
+def worker(url):
+    global counter
+    rate_limiter.wait_for_request_slot()
+
     crawl(url.strip())
-    counter += 1
+
+    with lock:
+        counter += 1
+        print(f"\rURLs Crawled: {counter}", end='')
+
+lock = threading.Lock()
+
+
+#Concurrently crawling page urls
+with concurrent.futures.ThreadPoolExecutor() as executor:
+    futures = [executor.submit(worker, url) for url in urls]
+
+concurrent.futures.wait(futures)
+print(f"Crawling complete. Processed {counter} URLs")
