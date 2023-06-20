@@ -66,8 +66,8 @@ def get_score(soup, url):
             p_text = p_tag.get_text()
             if p_text.startswith('Score : '):
                 score = int(p_text.split(':')[1].split()[0])
+                file_path = get_file_path(url) + "score.txt"
                 break
-        file_path = get_file_path(url) + "score.txt"
         score_dict = {file_path: score}
     finally:
         return score_dict
@@ -167,13 +167,8 @@ for line in lines:
         last_slash_index = line.rfind('/')
         urls.add(url_prefix + line[last_slash_index:].rstrip('\n'))
 
-# #Crawling page urls
-# counter = 0
-# for url in urls:
-#     print(f"URLs Visited: {counter}", end='\r')
-#     crawl(url.strip())
-#     counter += 1
 
+###Concurrency###
 class RateLimiter:
     def __init__(self, rate):
         self.delay = 1 / rate
@@ -215,4 +210,4 @@ with concurrent.futures.ThreadPoolExecutor() as executor:
     futures = [executor.submit(worker, url) for url in urls]
 
 concurrent.futures.wait(futures)
-print(f"Crawling complete. Processed {counter} URLs")
+print(f"\nCrawling complete")
