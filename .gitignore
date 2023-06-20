@@ -1,6 +1,7 @@
 .vscode/
 CodeCloneDatasets/
 testOutput/
+*_errors.txt
 
 !competitions/
 
